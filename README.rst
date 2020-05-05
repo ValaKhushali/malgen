@@ -1,7 +1,9 @@
 MalGen
 ======
 
-> usage: malgen.py [-h] [-e] [-o] payload output
+.. code-block:
+
+   usage: malgen.py [-h] [-e] [-o] payload output
 
 Craft obfuscated, fileless PowerShell malware.
 
