@@ -1,20 +1,22 @@
 MalGen
 ======
 
-.. code-block:
+.. code-block::
 
    usage: malgen.py [-h] [-e] [-o] payload output
 
-Craft obfuscated, fileless PowerShell malware.
+   Craft obfuscated, fileless PowerShell malware.
 
-positional arguments:
-  payload          Raw-formatted 32-bit binary payload
-  output           Output file path
+   positional arguments:
 
-optional arguments:
-  -h, --help       show this help message and exit
-  -e, --encode     Base64-encode output
-  -o, --obfuscate  Obfuscate output
+     payload          Raw-formatted 32-bit binary payload
+     output           Output file path
+
+   optional arguments:
+
+     -h, --help       show this help message and exit
+     -e, --encode     Base64-encode output
+     -o, --obfuscate  Obfuscate output
 
 Details
 -------
