@@ -47,3 +47,9 @@ With local or SSH access, there is one workaround to these buffer-size
 limitations. Simply type `powershell.exe -` and hit enter, then paste
 your payload, sans the preceding `powershell` and its command-line
 flags.
+
+Final Note
+----------
+This software is provided purely for educational, legal purposes. The author
+does not condone nor promote the use of this script for any unethical or
+illegal purposes. What you do with this is your own business.
